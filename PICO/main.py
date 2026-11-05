@@ -91,9 +91,10 @@ def error_fatal(codi):
 
 #////////////////////////////////////////////////////////////////////////////////////
 # configuració
+# Llegeix configuracio.csv. Si no existeix o és incorrecte, torna a la configuració per defecte
+# (versió 0): la RPi3 ho detecta i li reenvia la configuració vigent.
 def carrega_config():
-    """Llegeix configuracio.csv. Si no existeix o és incorrecte, torna a la configuració per defecte
-    (versió 0): la RPi3 ho detecta i li reenvia la configuració vigent."""
+
     try:
         with open(FITXER_CONFIG) as f:
             camps = f.readline().strip().split(";")
