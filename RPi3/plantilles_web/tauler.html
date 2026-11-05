@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titol %}Tauler{% endblock %}
+{% block contingut %}
+<section class="targetes" id="targetes">
+  <div class="targeta" id="t-gas"><span class="etiqueta" id="t-gas-etiqueta">Sensor Gas</span><span class="valor" id="t-gas-valor">—</span></div>
+  <div class="targeta" id="t-temperatura"><span class="etiqueta">Temperatura</span><span class="valor" id="t-temperatura-valor">—</span></div>
+  <div class="targeta" id="t-humitat"><span class="etiqueta">Humitat</span><span class="valor" id="t-humitat-valor">—</span></div>
+  <div class="targeta" id="t-senyal"><span class="etiqueta">Senyal LoRa</span><span class="valor" id="t-senyal-valor">—</span></div>
+</section>
+<p class="estat" id="estat">Carregant…</p>
+
+<div class="barra">
+  <span>Període:</span>
+  <div class="botons" id="periodes">
+    <button data-periode="1h">1 hora</button>
+    <button data-periode="24h" class="activa">24 hores</button>
+    <button data-periode="7d">7 dies</button>
+    <button data-periode="30d">30 dies</button>
+  </div>
+  <span class="nota" id="nota-agrupa"></span>
+</div>
+
+<section class="graficues">
+  <div class="targeta-grafica"><h3 id="g-gas-titol">Sensor Gas</h3><div id="g-gas"></div></div>
+  <div class="targeta-grafica"><h3>Temperatura (°C)</h3><div id="g-temperatura"></div></div>
+  <div class="targeta-grafica"><h3>Humitat (%)</h3><div id="g-humitat"></div></div>
+  <div class="targeta-grafica"><h3>Senyal LoRa (RSSI, dBm)</h3><div id="g-rssi"></div></div>
+</section>
+
+<h2>Resum del període</h2>
+<div class="taula-contenidor">
+  <table id="resum">
+    <thead><tr><th>Variable</th><th>Mínim</th><th>Màxim</th><th>Mitjana</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/grafica.js') }}"></script>
+<script src="{{ url_for('static', filename='js/tauler.js') }}"></script>
+{% endblock %}

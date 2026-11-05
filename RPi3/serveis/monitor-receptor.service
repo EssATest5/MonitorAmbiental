@@ -1,0 +1,14 @@
+[Unit]
+Description=Monitor ambiental - receptor LoRa (RPi3)
+After=multi-user.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/MonitorAmbiental
+ExecStart=/usr/bin/python3 -u /home/pi/MonitorAmbiental/lora_receptor.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

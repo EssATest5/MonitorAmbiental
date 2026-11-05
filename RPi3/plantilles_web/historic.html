@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titol %}Històric{% endblock %}
+{% block contingut %}
+<h1>Històric</h1>
+<form class="filtre" id="filtre" onsubmit="return false">
+  <label>Des de <input type="datetime-local" id="inici" required></label>
+  <label>Fins a <input type="datetime-local" id="fi" required></label>
+  <label>Agrupa per
+    <select id="agrupa">
+      <option value="cru">Cada lectura (sense agrupar)</option>
+      <option value="minut">1 minut</option>
+      <option value="10min">10 minuts</option>
+      <option value="hora" selected>1 hora</option>
+      <option value="dia">1 dia (UTC)</option>
+    </select>
+  </label>
+  <button type="submit" id="mostra" class="principal">Mostra</button>
+</form>
+<div class="barra">
+  <span>Accés ràpid:</span>
+  <div class="botons" id="rapids">
+    <button data-hores="24">Últimes 24 h</button>
+    <button data-hores="168">7 dies</button>
+    <button data-hores="720">30 dies</button>
+    <button data-hores="0">Tot</button>
+  </div>
+  <a id="csv" class="enllac-boto" href="#">Descarrega CSV</a>
+</div>
+<p class="estat" id="estat"></p>
+
+<section class="graficues">
+  <div class="targeta-grafica"><h3 id="g-gas-titol">Sensor Gas</h3><div id="g-gas"></div></div>
+  <div class="targeta-grafica"><h3>Temperatura (°C)</h3><div id="g-temperatura"></div></div>
+  <div class="targeta-grafica"><h3>Humitat (%)</h3><div id="g-humitat"></div></div>
+  <div class="targeta-grafica"><h3>Senyal LoRa (RSSI, dBm)</h3><div id="g-rssi"></div></div>
+</section>
+
+<h2>Resum de l'interval</h2>
+<div class="taula-contenidor">
+  <table id="resum">
+    <thead><tr><th>Variable</th><th>Mínim</th><th>Màxim</th><th>Mitjana</th></tr></thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<h2>Dades</h2>
+<p class="nota" id="nota-taula"></p>
+<div class="taula-contenidor">
+  <table id="dades"><thead></thead><tbody></tbody></table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/grafica.js') }}"></script>
+<script src="{{ url_for('static', filename='js/historic.js') }}"></script>
+{% endblock %}

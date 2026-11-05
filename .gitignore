@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+# dades generades a la RPi3 / Pico (no es pugen al repositori)
+dades/
+*.db
+*.db-wal
+*.db-shm
+configuracio.csv
+registre_mq135.csv

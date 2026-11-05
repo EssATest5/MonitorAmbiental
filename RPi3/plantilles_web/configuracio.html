@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titol %}Configuració{% endblock %}
+{% block contingut %}
+<h1>Configuració de la Pico</h1>
+
+<section class="estat-config {{ 'pendent' if pendent else 'aplicada' }}">
+  {% if pendent %}
+    <strong>Pendent d'aplicar.</strong>
+    La Pico encara té la versió {{ cfg.versio_aplicada }}; la darrera desada és la {{ cfg.versio }}.
+    Li arribarà amb la propera lectura que enviï.
+  {% else %}
+    <strong>Aplicada.</strong> La Pico treballa amb la versió {{ cfg.versio }}.
+  {% endif %}
+  <span class="nota">Darrer canvi: <span data-utc="{{ cfg.actualitzacio }}">{{ cfg.actualitzacio }}</span></span>
+</section>
+
+<form method="post" class="formulari" id="formulari" autocomplete="off">
+  <label>Període d'enviament (s)
+    <input type="number" name="periode" id="periode" value="{{ valors.periode }}"
+           min="{{ limits.periode[0] }}" max="{{ limits.periode[1] }}" required>
+    <small>Cada quants segons la Pico envia una lectura ({{ limits.periode[0] }}–{{ limits.periode[1] }}).</small>
+  </label>
+  <label>Nombre de mostres a promitjar
+    <input type="number" name="mostres" id="mostres" value="{{ valors.mostres }}"
+           min="{{ limits.mostres[0] }}" max="{{ limits.mostres[1] }}" required>
+    <small>Quantes lectures dels sensors es fan i se'n calcula la mitjana ({{ limits.mostres[0] }}–{{ limits.mostres[1] }}). Amb 1 no es fa mitjana.</small>
+  </label>
+  <label>Interval entre mostres (s)
+    <input type="number" name="interval" id="interval" value="{{ valors.interval }}"
+           min="{{ limits.interval[0] }}" max="{{ limits.interval[1] }}" required>
+    <small>Segons entre una mostra i la següent ({{ limits.interval[0] }}–{{ limits.interval[1] }}).</small>
+  </label>
+  <p class="comprovacio" id="comprovacio" data-marge="{{ marge }}"></p>
+  <button type="submit" class="principal">Desa la configuració</button>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/configuracio.js') }}"></script>
+{% endblock %}
