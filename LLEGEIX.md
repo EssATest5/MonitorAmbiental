@@ -46,3 +46,12 @@ la carpeta `proves/` no cal. Pins LoRa i LED a la capçalera de `main.py`; pins 
 ## Ràdio
 
 868 MHz, SF9, 125 kHz, CR 4/5, CRC activat, sync 0x12 (a `protocol.py`).
+
+## Sensor de gas: valors de treball
+
+- `RLOAD = 0.92` kΩ (mesurat) i `RZERO = 4.7` kΩ (`PICO/MQ135_DHT11.py`). **RZERO és una estimació de treball**, no una
+  calibració: surt d'un registre de 24 h (4-5/11/26) suposant que l'aire valia 426,89 ppm.
+- El **ppm és una estimació**; la dada més directa és `lectura_brut` (ADC), que sempre es guarda i permet recalcular-lo.
+- El sensor té caigudes aleatòries de lectura (la Rs puja de cop a un 36 % de les mostres). Per això la Pico envia
+  el valor **màxim** de l'ADC entre les mostres, no la mitjana: convé mantenir `mostres >= 5`.
+- Correcció per temperatura i humitat: desactivada (no hi ha calibració per validar-la).

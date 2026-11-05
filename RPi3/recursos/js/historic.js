@@ -17,7 +17,7 @@
   function pintaResum() {
     const r = dades.resum, cos = document.querySelector("#resum tbody");
     const files = [];
-    if (!senseValor(r.ppm.mitjana)) { files.push(["Sensor Gas (ppm)", r.ppm, 0]); }
+    if (!senseValor(r.ppm.mitjana)) { files.push(["Sensor Gas (ppm estimat)", r.ppm, 0]); }
     if (!senseValor(r.brut.mitjana)) { files.push(["Sensor, valor cru (ADC)", r.brut, 0]); }
     files.push(["Temperatura (°C)", r.temperatura, 1], ["Humitat (%)", r.humitat, 0]);
     cos.innerHTML = r.n ? files.map(function (f) {
@@ -57,7 +57,7 @@
     const teppm = dades.files.some(function (f) { return !senseValor(f.ppm); });
     grafiques.gas.o.clau = teppm ? "ppm" : "brut";
     grafiques.gas.o.unitat = teppm ? "ppm" : "ADC";
-    el("g-gas-titol").textContent = teppm ? "Sensor Gas (ppm)" : "Sensor Gas (valor cru de l'ADC, sense calibrar)";
+    el("g-gas-titol").textContent = teppm ? "Sensor Gas (ppm estimat)" : "Sensor Gas (valor cru de l'ADC, sense calibrar)";
     Object.keys(grafiques).forEach(function (k) { grafiques[k].posa(dades.files, finestra); });
     pintaResum(); pintaTaula();
     const n = dades.resum.n;

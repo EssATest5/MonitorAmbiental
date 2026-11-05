@@ -6,6 +6,8 @@
 #              mirar variable DEPURACIO 
 #   03/11/26 : espera d'arrencada, reintents de LoRa i reinici automàtic en lloc de sys.exit()
 #              (sense registre.txt ni watchdog, per simplicitat)
+#   05/11/26 : mostreja(): brut = màxim de les mostres (descarta les caigudes del sensor, no la mitjana)
+#              alies de import: P -> PROT, S -> SENSOR; comentaris d'aplica_config(), espera() i mostreja() a l'estil nou
 #
 """
  Per la Pico, en MicroPython  amb sensors: MQ-135 + DHT11 -> LoRa.
@@ -33,8 +35,8 @@ CS=GP17, RESET=GP20, DIO0=GP21. Si se canvien SCK, MOSI i MISO siguin d'un matei
 import machine
 from machine import Pin
 from lora import LoRa, millis, ticks_diff, sleep_ms
-import protocol as P
-import MQ135_DHT11 as S    # lectura dels sensors i càlcul del PPM
+import protocol as PROT
+import MQ135_DHT11 as SENSOR    # lectura dels sensors i càlcul del PPM
 
 PIN_LED = 25
 
@@ -95,17 +97,18 @@ def carrega_config():
     try:
         with open(FITXER_CONFIG) as f:
             camps = f.readline().strip().split(";")
-        periode, mostres, interval = P.valida_parametres(camps[0], camps[1], camps[2])
+        periode, mostres, interval = PROT.valida_parametres(camps[0], camps[1], camps[2])
         return {"periode": periode, "mostres": mostres, "interval": interval, "versio": int(camps[3])}
     except Exception:
         return dict(CONFIG_DEFECTE)
 #////////////////////////////////////////////////////////////////////////////////////
 
 #////////////////////////////////////////////////////////////////////////////////////
+# Aplica una configuració rebuda de la RPi3 (la RPi3 mana). Ignora la que no sigui vàlida.
 def aplica_config(nova):
-    """Aplica una configuració rebuda de la RPi3 (la RPi3 mana). Ignora la que no sigui vàlida."""
+
     try:
-        periode, mostres, interval = P.valida_parametres(
+        periode, mostres, interval = PROT.valida_parametres(
             nova["periode"], nova["mostres"], nova["interval"])
     except ValueError as e:
         mi_print("Configuració rebuda ignorada:", e)
@@ -123,13 +126,13 @@ def aplica_config(nova):
 def en_rebre(mida_paquet):
     if mida_paquet == 0:
         return
-    trama = P.llegeix_trama(lora)
+    trama = PROT.llegeix_trama(lora)
     if trama is None:
         return
     dest, orig, _id, text = trama
-    if (dest != P.ADR_PICO and dest != P.ADR_TOTS) or orig != P.ADR_RPI:
+    if (dest != PROT.ADR_PICO and dest != PROT.ADR_TOTS) or orig != PROT.ADR_RPI:
         return
-    resposta = P.descodifica_resposta(text)
+    resposta = PROT.descodifica_resposta(text)
     if resposta is None:
         return
     estat["ultim_ack"] = resposta["seq"]
@@ -140,7 +143,7 @@ def en_rebre(mida_paquet):
 #////////////////////////////////////////////////////////////////////////////////////
 # Espera ms mil·lisegons sense deixar de atendre la ràdio.
 def espera(ms):
-    """Espera ms mil·lisegons sense deixar de atendre la ràdio."""
+
     inici = millis()
     while ticks_diff(millis(), inici) < ms:
         lora.poll()
@@ -154,21 +157,24 @@ def mitjana(valors):
 #////////////////////////////////////////////////////////////////////////////////////
 
 #////////////////////////////////////////////////////////////////////////////////////
-# Pren config['mostres'] mostres separades config['interval'] s i retorna les mitjanes.
+# Pren config['mostres'] mostres separades config['interval'] s i retorna (ppm, brut, temperatura, humitat).
+# Temperatura i humitat: mitjana de les mostres. brut: el valor MÉS ALT de l'ADC, no la mitjana: el
+# sensor té caigudes aleatòries que només fan baixar la lectura (apareixen a un 36 % de les mostres) i
+# el màxim les descarta. Amb una sola mostra no hi ha protecció: convé mantenir mostres >= 5.
 def mostreja():
-    """Pren config['mostres'] mostres separades config['interval'] s i retorna les mitjanes."""
+
     n, interval = config["mostres"], config["interval"]
     brutes, temperatures, humitats = [], [], []
     for i in range(n):
         if i:
             espera(interval * 1000)
-        brutes.append(S.llegir_brut())
-        mesura = S.llegir_dht11_mostra()    # None si el DHT11 falla en aquesta mostra
+        brutes.append(SENSOR.llegir_brut())
+        mesura = SENSOR.llegir_dht11_mostra()    # None si el DHT11 falla en aquesta mostra
         if mesura is not None:
             temperatures.append(mesura[0])
             humitats.append(mesura[1])
-    brut = int(mitjana(brutes) + 0.5)
-    return S.calcula_ppm(brut), brut, mitjana(temperatures), mitjana(humitats)
+    brut = max(brutes)
+    return SENSOR.calcula_ppm(brut), brut, mitjana(temperatures), mitjana(humitats)
 #////////////////////////////////////////////////////////////////////////////////////    
 
 #////////////////////////////////////////////////////////////////////////////////////
@@ -184,9 +190,9 @@ def led_pampallugues(quantes):
 # cicle
 def cicle():
     ppm, brut, temperatura, humitat = mostreja()
-    text = P.codifica_dades(ppm, brut, temperatura, humitat, config["versio"])
+    text = PROT.codifica_dades(ppm, brut, temperatura, humitat, config["versio"])
     anterior_ok = estat["ultim_ack"] == (estat["seq"] - 1) & 0xFF
-    ok = P.envia_trama(lora, P.ADR_RPI, P.ADR_PICO, estat["seq"], text)
+    ok = PROT.envia_trama(lora, PROT.ADR_RPI, PROT.ADR_PICO, estat["seq"], text)
     mi_print("TX #%d %s (%s) | resposta de l'anterior: %s" % (
         estat["seq"], text, "ok" if ok else "ERROR", "sí" if anterior_ok else "no"))
     estat["seq"] = (estat["seq"] + 1) & 0xFF
@@ -200,20 +206,20 @@ def cicle():
 def principal():
     sleep_ms(ESPERA_ARRENCADA_MS)
     for intent in range(INTENTS_LORA):
-        if lora.begin(P.FREQUENCIA):
+        if lora.begin(PROT.FREQUENCIA):
             break
         mi_print("LoRa: mòdul no detectat (intent %d). Revisa el cablejat." % (intent + 1))
         sleep_ms(1000)
     else:
         error_fatal(2)    # 2 pampallugues repetits i reinici
-    P.configura_radio(lora)
+    PROT.configura_radio(lora)
     lora.on_receive(en_rebre)
     lora.receive()
     config.update(carrega_config())
     mi_print("Node Pico en marxa. Config v%d: període=%d s, mostres=%d, interval=%d s" % (
         config["versio"], config["periode"], config["mostres"], config["interval"]))
-    mi_print("Temps en l'aire d'una lectura: %d ms" % P.temps_aire_ms(
-        len(P.codifica_dades(9999.9, 65535, 99.0, 99.0, 99)) + 4))
+    mi_print("Temps en l'aire d'una lectura: %d ms" % PROT.temps_aire_ms(
+        len(PROT.codifica_dades(9999.9, 65535, 99.0, 99.0, 99)) + 4))
     led.value(1)    # funcionant
 
     inici_cicle = millis() - config["periode"] * 1000    # el primer cicle comença de seguida

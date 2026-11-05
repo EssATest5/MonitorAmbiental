@@ -4,6 +4,7 @@
 #	27/10/26 : creació
 #   03/11/26 : creo la funció mi_print() per evitar que es pengi el no tenir terminal connectat i funcionar sense USB.
 #              mirar variable DEPURACIO 
+#   05/11/26 : RZERO = 4.7 (abans 22.68), a partir del registre de 24 h del 4-5/11/26
 #
 """
  Lectura del sensor MQ-135 i DHT11
@@ -61,7 +62,7 @@ DIVISOR_SUPERIOR = 10000.0
 DIVISOR_INFERIOR = 15000.0
 
 RLOAD = 0.92       # kOhm
-RZERO = 22.68      # kOhm (provisional)
+RZERO = 4.7        # kOhm (valor de treball: mediana de la Rs neta d'un registre de 24 h, suposant aire a 426,89 ppm)
 
 
 # ---------------------------------------------------------------------------

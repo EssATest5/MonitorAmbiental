@@ -5,6 +5,7 @@
 #	30/10/26 : creació
 #   02/11/26 : Canvio el nom dels camps mq135_ppm i mq135_brut per lectura_ppm i lectura_brut
 #   05/11/26 : corregit lectures(): la variable del bucle 'resultat' trepitjava la llista de sortida
+#   05/11/26 : alies de import: P -> PROT
 #
 """
 base_dades.py - Gestió de la base de dades SQLite (compartit pel receptor LoRa i pel web).
@@ -23,7 +24,7 @@ import sqlite3
 from datetime import datetime, timezone
 
 import configuracio as CFG
-import protocol as P
+import protocol as PROT
 
 ####################################################################################
 # Definicións de Taules per si cal recrear
@@ -128,7 +129,7 @@ def llegeix_configuracio(bd):
 # Puja la versió: el receptor la farà arribar a la Pico a la propera lectura.
 def desa_configuracio(bd, periode, mostres, interval):
 
-    periode, mostres, interval = P.valida_parametres(periode, mostres, interval)
+    periode, mostres, interval = PROT.valida_parametres(periode, mostres, interval)
     bd.execute(
         "UPDATE configuracio SET periode_lectura = ?, nombre_mostres = ?, interval_mostres = ?, "
         "versio = versio + 1, actualitzacio = ? WHERE id = 1",

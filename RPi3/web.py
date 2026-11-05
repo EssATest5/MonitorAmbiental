@@ -4,6 +4,7 @@
 # modificat: 
 #	31/10/26 : creació
 #   02/11/26 : Canvio el nom dels camps mq135_ppm i mq135_brut per lectura_ppm i lectura_brut
+#   05/11/26 : alies de import: P -> PROT
 #       
 """
 web.py - Servidor web (Flask) del monitor ambiental.
@@ -27,7 +28,7 @@ from flask import (Flask, Response, flash, g, jsonify, redirect, render_template
 
 import base_dades as BD
 import configuracio as CFG
-import protocol as P
+import protocol as PROT
 
 ####################################################################################
 # Crea els objectes per la app
@@ -117,7 +118,7 @@ def configuracio():
     if valors is None:
         valors = {"periode": cfg["periode"], "mostres": cfg["mostres"], "interval": cfg["interval"]}
     return render_template("configuracio.html", cfg=cfg, valors=valors,
-                           pendent=BD.configuracio_pendent(cfg), limits=P.LIMITS, marge=P.MARGE_S)
+                           pendent=BD.configuracio_pendent(cfg), limits=PROT.LIMITS, marge=PROT.MARGE_S)
 #///////////////////////////////////////////////////////////////////////////////////
 
 #///////////////////////////////////////////////////////////////////////////////////
